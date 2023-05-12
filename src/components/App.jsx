@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 
-import { Searchbar, ImageGallery, Button, Loader } from './index';
+import { Searchbar, ImageGallery, Button, Loader, Modal } from './index';
 import { searchImages } from 'services/pixabay-api';
 
 export class App extends Component {
@@ -93,12 +93,12 @@ export class App extends Component {
           <ImageGallery images={images} onClick={this.setActiveImageUrl} />
         )}
 
-        {/* {activeImage && (
+        {activeImage && (
           <Modal
             url={activeImage}
             onClose={() => this.setActiveImageUrl(null)}
           />
-        )} */}
+        )}
 
         {isVisibleButton && (
           <Button onClick={this.setNextPage}>Load More</Button>
