@@ -13,7 +13,11 @@ const config = {
 };
 
 export async function searchImages(query, page = 1) {
-  const urlAXIOS = `?page=${page}&q=${query}`;
-  const { data } = await axios.get(urlAXIOS, config);
-  return data;
+  try {
+    const urlAXIOS = `?page=${page}&q=${query}`;
+    const { data } = await axios.get(urlAXIOS, config);
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
 }

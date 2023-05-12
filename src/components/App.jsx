@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 
-import { Searchbar } from './index';
+import { Searchbar, ImageGallery, Button, Loader } from './index';
 import { searchImages } from 'services/pixabay-api';
 
 export class App extends Component {
@@ -14,6 +14,49 @@ export class App extends Component {
     totalPages: 1,
   };
 
+  componentDidUpdate(_, prevState) {
+    const { query: prevQuery, page: prevPage } = prevState;
+    const { query, page } = this.state;
+
+    if (!query) return;
+
+    if (page !== prevPage || query !== prevQuery) {
+      this.getImages();
+    }
+  }
+
+  async getImages() {
+    const { query, page, images } = this.state;
+
+    this.setStatus('pending');
+
+    try {
+      const { hits, totalHits } = await searchImages(query, page);
+
+      if (!hits.length) {
+        toast.info('Oooh oh, there are no results that match your query.');
+        return;
+      }
+
+      this.setState({
+        images: [...images, ...hits],
+      });
+
+      if (page === 1) {
+        toast.info(`Hooray! We found ${totalHits} image(s).`);
+        this.calculateTotalPages(totalHits);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      this.setStatus('resolved');
+    }
+  }
+
+  calculateTotalPages(total) {
+    this.setState({ totalPages: Math.ceil(total / 12) });
+  }
+
   handleSearchQuery = query => {
     this.setState({
       query,
@@ -24,7 +67,17 @@ export class App extends Component {
     });
   };
 
+  setActiveImageUrl = url => this.setState({ activeImage: url });
+
+  setNextPage = () => this.setState(({ page }) => ({ page: page + 1 }));
+
+  setStatus = status => this.setState({ status });
+
   render() {
+    const { status, images, activeImage, page, totalPages } = this.state;
+
+    const isVisibleButton = page < totalPages && status === 'resolved';
+
     return (
       <div
         style={{
@@ -35,6 +88,24 @@ export class App extends Component {
         }}
       >
         <Searchbar onSearch={this.handleSearchQuery} />
+
+        {images.length > 0 && (
+          <ImageGallery images={images} onClick={this.setActiveImageUrl} />
+        )}
+
+        {/* {activeImage && (
+          <Modal
+            url={activeImage}
+            onClose={() => this.setActiveImageUrl(null)}
+          />
+        )} */}
+
+        {isVisibleButton && (
+          <Button onClick={this.setNextPage}>Load More</Button>
+        )}
+
+        {status === 'pending' && <Loader />}
+
         <ToastContainer theme="colored" autoClose={3000} />
       </div>
     );
