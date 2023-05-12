@@ -1,12 +1,17 @@
 import { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-
 import { Searchbar, ImageGallery, Button, Loader, Modal } from './index';
 import { searchImages } from 'services/pixabay-api';
 
+const STATUS = {
+  PENDING: 'PENDING',
+  FULFILLED: 'FULFILLED',
+  REJECTED: 'REJECTED',
+  IDLE: 'IDLE',
+};
 export class App extends Component {
   state = {
-    status: 'idle',
+    status: STATUS.IDLE,
     query: '',
     images: [],
     activeImage: null,
@@ -28,7 +33,7 @@ export class App extends Component {
   async getImages() {
     const { query, page, images } = this.state;
 
-    this.setStatus('pending');
+    this.setStatus(STATUS.PENDING);
 
     try {
       const { hits, totalHits } = await searchImages(query, page);
@@ -49,7 +54,7 @@ export class App extends Component {
     } catch (error) {
       toast.error(error.message);
     } finally {
-      this.setStatus('resolved');
+      this.setStatus(STATUS.FULFILLED);
     }
   }
 
@@ -63,7 +68,7 @@ export class App extends Component {
       page: 1,
       images: [],
       totalPages: 1,
-      status: 'idle',
+      status: STATUS.IDLE,
     });
   };
 
@@ -76,7 +81,7 @@ export class App extends Component {
   render() {
     const { status, images, activeImage, page, totalPages } = this.state;
 
-    const isVisibleButton = page < totalPages && status === 'resolved';
+    const isVisibleButton = page < totalPages && status === STATUS.FULFILLED;
 
     return (
       <div
@@ -104,7 +109,7 @@ export class App extends Component {
           <Button onClick={this.setNextPage}>Load More</Button>
         )}
 
-        {status === 'pending' && <Loader />}
+        {status === STATUS.PENDING && <Loader />}
 
         <ToastContainer theme="colored" autoClose={3000} />
       </div>
