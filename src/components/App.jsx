@@ -23,8 +23,6 @@ export class App extends Component {
     const { query: prevQuery, page: prevPage } = prevState;
     const { query, page } = this.state;
 
-    if (!query) return;
-
     if (page !== prevPage || query !== prevQuery) {
       this.getImages();
     }

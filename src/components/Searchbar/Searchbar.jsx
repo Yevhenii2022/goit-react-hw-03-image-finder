@@ -24,12 +24,13 @@ export class Searchbar extends Component {
     const { query } = this.state;
     const normilizedQuery = query.toLocaleLowerCase().trim();
 
-    this.props.onSearch(normilizedQuery);
-    this.setState({ query: normilizedQuery });
-
     if (!normilizedQuery) {
       toast.warning('Please, enter your search query.');
+      return;
     }
+
+    this.setState({ query: normilizedQuery });
+    this.props.onSearch(normilizedQuery);
   };
 
   handleInputChange = ({ target: { name, value } }) => {
